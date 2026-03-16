@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sigma-operator"
 version = "0.1.0"
-description = "Operator-first Sigma.Money CLI scaffold for capture, decode, plan, ABI inspection, and read-only account fetch."
+description = "Evidence-first Sigma.Money CLI for BNB Chain capture, decode, planning, ABI inspection, and read-only account inspection."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []

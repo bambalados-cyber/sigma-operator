@@ -1,12 +1,13 @@
 # Sigma CLI status and public-repo path
 
-_Last updated: 2026-03-16_
+_Last updated: 2026-03-17_
 
 Purpose: give maintainers and future contributors one stable repo-quality memo for where `sigma-operator` started, what the Part 2 frontier achieved, what changed, what is still unresolved, and what this repo needs before it is comfortable as a public contributor-facing project.
 
 This is a **status + trajectory** document, not a replacement for the run ledger.
 For attempt-by-attempt history, use `SIGMA_RUN_LEDGER.md`.
 For the current compact dashboard, use `STATUS.md`.
+For the public-facing repo contract, use `SPEC.md` and `COMMAND_MATURITY.md` first.
 
 ---
 
@@ -303,15 +304,16 @@ Not yet safe to promise publicly:
 ### Recommended public-repo evolution
 
 #### 1) Docs structure
-Before wider contributor onboarding, add or tighten:
+Public-facing repo docs are now in better shape:
+- `README.md`
+- `SPEC.md`
+- `COMMAND_MATURITY.md`
 - `CONTRIBUTING.md`
+- `STATUS.md`
+
+Still reasonable later additions if the repo grows:
 - `TESTING.md` or `docs/testing.md`
 - a short `ARCHITECTURE.md` describing capture / decode / route-truth / account modules
-- a stable “source of truth” section in README explaining the role of:
-  - `STATUS.md`
-  - `SIGMA_RUN_LEDGER.md`
-  - this document
-  - the Part 2 pack
 
 #### 2) Command stability policy
 Classify commands explicitly, for example:
@@ -357,10 +359,12 @@ Contributors should not have to guess whether a command is expected to be CI-saf
 If you are new to the repo, read in this order:
 1. `README.md`
 2. `STATUS.md`
-3. this document
-4. `SIGMA_RUN_LEDGER.md`
-5. `SIGMA_CLI_COMMAND_SPEC_NEXT.md`
-6. `MINT_CLOSE_CONTRACT_MAP_2026-03-16.md` if you are touching mint-close logic
+3. `SPEC.md`
+4. `COMMAND_MATURITY.md`
+5. this document
+6. `SIGMA_RUN_LEDGER.md`
+7. `SIGMA_CLI_COMMAND_SPEC_NEXT.md`
+8. `MINT_CLOSE_CONTRACT_MAP_2026-03-16.md` if you are touching mint-close logic
 
 If you are continuing live-verification work, also read:
 - `PART2_PLAN.md`
