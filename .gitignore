@@ -1,0 +1,16 @@
+# Local verification artifacts
+captures/
+tmp/
+
+# Python cache
+__pycache__/
+*.py[cod]
+sigma_operator/__pycache__/
+
+# Local environment / tooling
+.venv/
+.pytest_cache/
+.mypy_cache/
+
+# macOS
+.DS_Store
