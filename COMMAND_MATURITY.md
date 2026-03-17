@@ -2,12 +2,12 @@
 
 _Last updated: 2026-03-17_
 
-This file is the public-facing command/surface truth map for SigmaCLI.
+This file is the public command-truth map for SigmaCLI.
 
-Use it to answer two questions:
+It answers two different questions:
 
-1. **What exists in the CLI today?**
-2. **How hard should I trust it?**
+1. **What is shipped in the repo today?**
+2. **What is the next wallet/execution command spine, and what is its maturity?**
 
 ## Maturity labels
 
@@ -26,82 +26,96 @@ Use it to answer two questions:
 ### Scaffold
 
 - command exists
-- output is structural, truthful, and intentionally limited
-- not yet deep live-data support
+- output is intentionally limited and structural
+- useful for orientation, not deep execution support
 
 ### Planned
 
-- not implemented yet
-- may appear in specs or roadmap notes only
+- documented as part of the next architecture
+- not shipped yet, or not shipped in its full intended form
 
-## Command-family status
+## Current shipped command families
 
 | Command family | Maturity | Notes |
 | --- | --- | --- |
-| `capture docs`, `capture start`, `capture browser-helper`, `capture import` | Verified | Core repo workflow tooling. Useful for evidence collection and session setup. |
-| `decode` raw calldata / tx JSON / capture-dir | Verified | Core decode path. Good current repo value. |
+| `capture docs`, `capture start`, `capture browser-helper`, `capture import` | Verified | Evidence collection tooling. Useful, but not the core product architecture. |
+| `decode` raw calldata / tx JSON / capture-dir | Verified | Core decode path. Strong current repo value. |
 | `decode --tx-hash --fetch-source rpc` | Verified | Canonical live read path on BNB Chain. Requires user-supplied RPC. |
-| `decode --tx-hash --fetch-source explorer` | Alpha / read-first | Implemented, but provider support on BNB Chain is inconsistent / secondary. |
-| `plan` | Verified | Plan-only output with warnings and operation disambiguation. Not execution tooling. |
+| `decode --tx-hash --fetch-source explorer` | Alpha / read-first | Implemented, but secondary and provider-dependent on BNB Chain. |
+| `plan` | Verified | Plan-only output with warnings and disambiguation. Not wallet execution yet. |
 | `abi inspect` | Verified | Stable cache inspection utility. |
 | `abi refresh` | Alpha / read-first | Useful, but depends on the upstream helper bridge / external context. |
 | `account status` | Verified | Strong read-only owner/position entrypoint. |
 | `account positions` | Verified | Flattened projection of current positions. |
 | `account history` | Alpha / read-first | Useful, but depends partly on Sigma no-auth helper behavior. |
 | `account mint-close-readiness` | Verified | One of the repo’s strongest current read-side features. |
-| `account stability-pools` | Verified | Strong read-side classification for deposited vs pending vs claimable states. |
-| `account bnbusd-trace` | Alpha / read-first | Valuable operator analysis; still interpretive rather than perfect asset-lineage proof. |
+| `account stability-pools` | Verified | Strong classification for deposited vs pending vs claimable states. |
+| `account bnbusd-trace` | Alpha / read-first | Valuable operator analysis; still interpretive rather than perfect lineage proof. |
 | `config` | Verified | Operator-side approval-policy persistence is real and shipped. |
-| `governance overview` and `governance xsigma|vote|incentivize ...` | Scaffold | Honest structural commands only. Not deep live integrations yet. |
+| `governance overview` and `governance xsigma|vote|incentivize ...` | Scaffold | Structural truth commands only. Not the current architecture focus. |
 
-## Route-truth status
+## Next command spine
 
-These are not exactly command labels, but they matter for how the CLI should be described.
+These are the target command families for the wallet-backed architecture described in [`WALLET_ARCHITECTURE.md`](WALLET_ARCHITECTURE.md).
 
-| Surface | Status | Notes |
+| Command family | Maturity | Notes |
 | --- | --- | --- |
-| `/trade` | Verified live | Explicit `Close` path is proven distinct from `Adjust Leverage`; terminal close is verified onchain. |
-| `/earn` | Verified live, read-first strongest | Deposit and delayed redeem semantics were observed; repo value is strongest on read/evidence. |
-| `/mintv2` | Verified live, bounded | BNB -> bnbUSD mint open is verified; partial repay/partial close is verified; do not overstate generalized write support. |
-| `/dashboard` | Route-render-observed | Useful next-phase read target, not yet deep CLI support. |
-| `/statistics` | Route-render-observed | Good next-phase read target; current CLI family not implemented yet. |
-| `/xsigma` | Route-render-observed | Do not market as deep live support yet. |
-| `/vote` | Route-render-observed | Same caution as above. |
-| `/incentivize` | Route-render-observed | Same caution as above. |
-| `/governance` | Blank / non-rendered | Broken umbrella route; do not center public repo messaging on it. |
+| `auth` | Planned | Backend discovery, profile connection, wallet/session state. |
+| `status` | Planned | Execution-aware operator summary across backend, routes, balances, and positions. |
+| `doctor` | Planned | Preflight route/backend/policy checks before execution. |
+| `plan` execution artifact mode | Planned | Current `plan` exists, but the wallet-backed plan artifact format is still next-phase work. |
+| `execute` | Planned | Policy-gated route execution through direct adapters. |
+| `verify` | Planned | Post-state verification separate from tx submission. |
 
-## Verified semantic distinctions the repo should preserve
+## Route capability status
 
-These distinctions are part of repo maturity too.
+These labels matter because SigmaCLI should never imply that route visibility equals route support.
+
+| Surface / route area | Status | Notes |
+| --- | --- | --- |
+| `/trade` | Verified live semantics | Explicit `Close` is proven distinct from `Adjust Leverage`; terminal close is verified onchain. |
+| `/mintv2` | Verified live, bounded | BNB -> bnbUSD mint open is verified; partial repay / partial close is verified; direct wallet architecture still needs to be built. |
+| `/earn` | Verified live, read-first strongest | Deposit and delayed redeem semantics were observed; direct route adapters are still next-phase work. |
+| `/dashboard` | Route-render-observed | Real surface, but not the current architecture focus. |
+| `/statistics` | Route-render-observed | Real surface, but not the current architecture focus. |
+| `/xsigma` | Route-render-observed | Not the current focus. |
+| `/vote` | Route-render-observed | Not the current focus. |
+| `/incentivize` | Route-render-observed | Not the current focus. |
+| `/governance` | Blank / non-rendered | Broken umbrella route; do not center public messaging on it. |
+
+## Preserved semantic distinctions
+
+These truths remain part of repo maturity:
 
 - **partial repay / partial close** is not the same as **terminal close**
 - explicit `/trade` `Close` is not the same as `Adjust Leverage`
 - a wallet-owned NFT with `rawColls = 0` and `rawDebts = 0` is a **zero-state shell**, not an active economic position
-- SigmaCLI should currently be described as **stronger on read/evidence than on generalized execution**
+- SigmaCLI is currently stronger on **read/evidence** than on **generalized execution**
+- browser capture may remain useful, but it is **not** the core architecture
 
-## Planned next additions
-
-Not implemented yet, but good next targets:
-
-- `stats`
-- route-specific `dashboard` reads
-- richer owner aggregation under `account`
-- route-specific governance-side reads beyond scaffolds
-- deeper `/trade` management semantics beyond explicit close
-
-## Public wording guardrails
+## Safe public wording
 
 Safe wording today:
 
-- “evidence-first operator CLI”
-- “read-first”
-- “verified trade close evidence”
-- “mint-close readiness tooling”
-- “governance scaffolds”
+- "wallet-aware evidence-first operator CLI"
+- "read-first today, execution foundation next"
+- "direct wallet/backend architecture"
+- "verified trade close evidence"
+- "mint repay/readiness tooling"
+- "post-state verification"
 
 Unsafe wording today:
 
-- “full Sigma CLI”
-- “production execution support”
-- “governance fully supported”
-- “all visible routes are integrated”
+- "full Sigma CLI"
+- "browser automation product"
+- "production execution support across Sigma"
+- "all visible routes are integrated"
+- "governance fully supported"
+
+## Bottom line
+
+Current repo truth:
+
+- SigmaCLI already ships meaningful read-side operator tooling.
+- The next command spine is now clearly wallet/backend centered.
+- Planned execution support should be described as planned until the backend, policy, execute, and verify layers really land.

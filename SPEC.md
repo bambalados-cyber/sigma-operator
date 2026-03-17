@@ -4,264 +4,241 @@ _Last updated: 2026-03-17_
 
 ## 1) Purpose
 
-SigmaCLI (`sigma-operator`) is an operator-first CLI for **Sigma on BNB Chain / BSC**.
+SigmaCLI (`sigma-operator`) is a wallet-aware operator CLI for **Sigma on BNB Chain / BSC**.
 
-Its job is to help an operator:
+Its long-term job is to let an operator or agent:
 
-- capture Sigma app and network evidence
-- decode calldata, txs, receipts, and logs against cached ABIs
-- model named Sigma operations without pretending they are all fully executable
-- inspect current account, position, and repay-readiness state via read-only RPC and current-app helper data
-- keep route truth, command truth, and repo claims aligned
+- inspect Sigma state directly
+- connect to a wallet/signing backend
+- plan route-specific actions before signing
+- execute guarded protocol/app interactions through direct adapters
+- verify post-state after execution
 
-This repo is intentionally **founder/operator-grade**, not a corporate SDK and not a generic autotrader.
+Its current shipped job is narrower and already useful:
 
-## 2) Trust model
+- capture evidence
+- decode calldata, txs, receipts, and logs
+- inspect account and position state
+- model route semantics in read-first form
 
-SigmaCLI follows a **read-first, execution-later** trust model.
+## 2) Core architecture rule
 
-That means:
+SigmaCLI is now built around this rule:
 
-1. prefer read-only evidence over assumptions
-2. prefer decoded receipts over frontend guesswork
-3. prefer route-specific truth over generic product language
-4. prefer honest partial support over fake completeness
-5. treat wallet-required execution as a separate, higher-confidence bar
+> **wallet connectivity and direct route interaction are the product architecture; browser automation is not.**
 
-In practice:
+Browser/UI work may still help with:
 
-- a route may be **render-observed** without being execution-ready
-- a command may be useful and shipped even if it is still **alpha/read-first**
-- a route or command should not be upgraded to “verified” unless the repo has evidence to justify it
+- route discovery
+- reverse-engineering
+- validation
+- evidence capture
 
-## 3) Current verified capabilities
+But it is not the runtime contract the repo should optimize around.
 
-### Core CLI foundation
+## 3) Trust model
 
-The repo already ships useful operator tooling for:
+SigmaCLI follows a **read / plan / execute / verify** trust model.
 
-- capture-session scaffolding
-- HAR / devtools import normalization
-- calldata / tx / receipt / log decode
-- live tx-hash fetch over read-only BNB RPC
-- ABI inspection and refresh helpers
-- plan-only modeling for named Sigma operations
-- read-only owner / position / stability-pool inspection
-- mint-close readiness and bnbUSD repay-source analysis
+### Read
 
-### Verified route truth
+Use chain reads, Sigma APIs, and decoded evidence to understand actual current state.
 
-#### `/trade`
+### Plan
 
-Verified today:
+Create an explicit action plan before signing. That plan should state:
 
-- explicit `Close` exists as a real surfaced path
-- explicit `Close` is distinct from `Adjust Leverage`
-- the surfaced close path is proven end to end onchain
-- verified terminal close settled to **USDT**
+- route
+- inputs
+- required assets
+- required backend capabilities
+- approval behavior
+- expected post-state
 
-Important nuance:
+### Execute
 
-- tx `0x9b7323079dbb07bf0cd6b9fb89d0f5851d3c36235b9f26592c808934b9d0f50d` is **not** the final close story; it is a verified partial repay / partial close
-- tx `0xb873c68cf4785645b17f0100dbe54744f34b797e3c9afa5dd343aa0704c69092` is the verified terminal `/trade` close
+Only execute when:
 
-#### `/earn`
+- the route adapter exists
+- the backend supports the required capabilities
+- policy checks pass
+- the route maturity is honest enough for bounded execution
 
-Verified today:
+### Verify
 
-- bounded deposit semantics were observed live
-- delayed withdraw / redeem timing semantics were observed live
-- the repo can classify wallet-held balance vs deposited shares vs pending delayed withdraw vs claimable-after-unlock
+Re-read state after submission.
 
-#### `/mintv2`
+A tx hash alone is not a success condition. SigmaCLI should verify:
 
-Verified today:
+- receipt state
+- balance or debt deltas
+- position changes
+- payout asset where relevant
+- shell-position semantics where relevant
 
-- BNB -> bnbUSD mint open is real
-- read-side mint-close readiness is useful and implemented
-- partial repay / partial close semantics are real and distinct from terminal trade close
+## 4) Current verified truths to preserve
 
-Important nuance:
+These remain part of the public repo truth:
 
-- the repo should not present `/mintv2` as a fully generalized write surface
-- mint-close is now best understood as a **read-first repay-semantics problem** unless fresh repay-ready live evidence is being collected
+- explicit `/trade` **Close** is distinct from `Adjust Leverage`
+- tx `0x9b7323079dbb07bf0cd6b9fb89d0f5851d3c36235b9f26592c808934b9d0f50d` is verified **partial repay / partial close**
+- tx `0xb873c68cf4785645b17f0100dbe54744f34b797e3c9afa5dd343aa0704c69092` is verified **terminal `/trade` close**
+- the terminal close paid out verified **USDT**
+- a fully closed economic position can still remain as a wallet-owned **zero-state shell NFT** with zero collateral and zero debt
 
-#### Governance-related surfaces
+These truths matter because the future execution layer must preserve them in both planning and verification.
 
-Current repo stance:
+## 5) Product shape
 
-- `/governance` remains the broken / blank umbrella route
-- route-specific children such as `/xsigma`, `/vote`, `/incentivize`, `/dashboard`, and `/statistics` are better next-phase targets
-- governance is **not** the center of the repo’s current credibility story
+SigmaCLI should be thought of as five layers.
 
-## 4) Command surface model
+### Layer 1 — evidence and route truth
 
-SigmaCLI’s command surface is organized into a few practical families.
+- capture
+- decode
+- ABI inspection
+- route-truth registry
 
-### `capture`
+### Layer 2 — read-side account state
 
-Use when you need:
-
-- a capture workspace
-- browser helper scaffolding
-- import of HAR/devtools exports into decode-ready artifacts
-
-### `decode`
-
-Use when you need:
-
-- raw calldata decode
-- JSON / HAR tx ingest
-- tx-hash fetch + decode over read-only BNB RPC
-- evidence-first interpretation of what happened onchain
-
-### `plan`
-
-Use when you need:
-
-- named operation planning
-- disambiguation between similar-looking product actions
-- warnings and operator notes without claiming execution certainty
-
-### `account`
-
-Use when you need:
-
-- current positions
-- Sigma no-auth history overlays
+- account status
+- positions
+- history
+- repay readiness
 - stability-pool state
-- mint-close readiness
-- repay-source tracing for bnbUSD
+- asset tracing
 
-### `abi`
+### Layer 3 — wallet backend and policy
 
-Use when you need:
+- backend selection
+- auth/session state
+- approval policy
+- slippage policy
+- route enablement policy
 
-- manifest inspection
-- ABI refresh through the upstream helper bridge
+### Layer 4 — route-specific adapters
 
-### `config`
+Examples:
 
-Use when you need:
+- `trade.close`
+- `mint.repay`
+- `earn.deposit`
+- `earn.claim`
 
-- persisted operator-side approval policy
-- explicit `unlimited`, `exact`, or `custom` approval stance
+Each route adapter should be explicit and independently matured.
 
-### `governance`
+### Layer 5 — verification
 
-Current meaning:
+- tx receipt verification
+- post-state verification
+- discrepancy classification
+- saved artifacts for operator review
 
-- a **structural CLI umbrella** only
-- route-truth and scaffold output today
-- not deep live governance support
+## 6) Backend model
 
-## 5) Maturity labels
+SigmaCLI should support a small set of backend types.
 
-This repo uses a small, explicit maturity model.
+### `readonly`
 
-### Verified
+- no signing
+- no tx submission
+- default lowest-risk mode
 
-- shipped in the CLI
-- exercised against real repo evidence
-- safe to describe as current repo capability
+### `external-session`
 
-### Alpha / read-first
+- externally managed wallet/signing session
+- may be backed by a wallet like Rabby
+- SigmaCLI treats it as a signer/session provider, not a browser UI target
 
-- shipped and useful
-- may rely on evolving route, RPC, or app-helper assumptions
-- should still be described with caution
+### `local-key-env`
 
-### Scaffold
+- explicit env-var key loading for dev/test or tightly controlled automation
+- secondary path, not the default public recommendation
 
-- command exists
-- output is structural / truthful / useful for orientation
-- not yet deep live data support
+### Optional later session backends
 
-### Planned
+- walletconnect-style session backends
+- other signer bridges
 
-- intentionally not implemented yet
-- may appear in design docs, not as present-tense support
+See [`WALLET_ARCHITECTURE.md`](WALLET_ARCHITECTURE.md) for the detailed backend model.
 
-See [`COMMAND_MATURITY.md`](COMMAND_MATURITY.md) for the current mapping.
+## 7) Command model
 
-## 6) Operator workflow model
+The next stable command spine should be:
 
-The intended operator loop is:
+- `auth`
+- `status`
+- `doctor`
+- `plan`
+- `execute`
+- `verify`
 
-1. **capture** a route, popup, or tx bundle if needed
-2. **decode** what actually happened
-3. **inspect account state** read-only
-4. **plan** the named operation with explicit warnings
-5. **compare route truth vs command truth**
-6. only then consider bounded manual wallet execution
+Current shipped families such as `capture`, `decode`, `account`, `abi`, and `config` remain important. They become supporting layers around that spine.
 
-This workflow exists to stop the repo from drifting into frontend mythology.
+## 8) Route capability model
 
-## 7) Current credibility boundary
+Every route should have an explicit capability record.
 
-SigmaCLI is already credible when it says:
+That record should say:
 
-- “here is the decoded tx evidence”
-- “here is the current onchain position state”
-- “here is the repay-ready vs not-repay-ready distinction”
-- “here is the difference between partial close and terminal close”
+- whether read support exists
+- whether plan support exists
+- whether execute support exists
+- whether verify support exists
+- which backends are allowed
+- what approval behavior is expected
+- what post-state checks define success
+- what maturity label applies
 
-SigmaCLI is **not** yet trying to be credible when it says:
+This keeps SigmaCLI from drifting into fake generic support.
 
-- “every route is supported”
-- “all governance surfaces are live-integrated”
-- “write execution is generic and safe”
-- “visible route equals verified route”
+## 9) Current repo stage
 
-## 8) Near-term milestones
+Today the repo is best described as:
 
-The concrete public scope for the next step lives in [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md).
+- **shipped and credible on read-side operator work**
+- **architecturally pivoting toward wallet-backed direct execution**
+- **not yet a broad production execution CLI**
 
-The next milestone should deepen the repo where it is already strong.
+That is an honest and useful public position.
 
-### Milestone A — route-specific read expansion
+## 10) Current focus and non-focus
 
-Build read-first support for:
+### Current focus
 
-- `stats`
-- `dashboard`
-- richer account aggregation
-- route-specific governance-side reads where they are actually observed
+- wallet backend abstraction
+- execution policy
+- plan / execute / verify flow
+- direct route adapters
+- post-state verification
 
-### Milestone B — remaining `/trade` management semantics
+### Not the current focus
 
-Prove, don’t assume:
+- governance-first expansion
+- broad route marketing
+- browser automation as runtime architecture
+- pretending support exists where only UI visibility exists
 
-- add margin
-- reduce
-- leverage-adjust edge behavior
-- how those paths relate to the already-verified explicit close path
+## 11) Milestone direction
 
-### Milestone C — dedicated `/mintv2` close semantics on a fresh position
+The next milestone is not “add more random surfaces.”
 
-Only after repay readiness exists again on a new live position:
+It is:
 
-- re-check the dedicated `/mintv2` close execution story
-- keep it separate from the already-verified `/trade` terminal close story
-- preserve the distinction between partial repay, terminal close, and zero-state shell NFT semantics
+1. build the wallet foundation first
+2. define the command spine clearly
+3. add route capability and policy gating
+4. land the first direct route adapters in the strongest verified areas
 
-## 9) Non-goals for the current repo stage
+See [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md) and [`SIGMA_CLI_COMMAND_SPEC_NEXT.md`](SIGMA_CLI_COMMAND_SPEC_NEXT.md).
 
-Not current goals:
+## 12) Bottom line
 
-- production-safe transaction execution
-- broad multi-route automation
-- governance-first product framing
-- pretending blank or ambiguous routes are supported just because the codebase hints at them
+SigmaCLI should become a **wallet-connected operator shell** for Sigma:
 
-## 10) Bottom line
+- direct where possible
+- guarded by policy
+- explicit about maturity
+- verified after every action
 
-SigmaCLI already has a real public-repo story:
-
-- it is evidence-first
-- it is read-first
-- it has verified live route truth where it matters
-- it distinguishes partial close from terminal close
-- it keeps claims tighter than the average crypto operator tool
-
-That is enough to be useful publicly — as long as the repo keeps choosing **truth over breadth**.
+That is the product story the repo should now optimize for.

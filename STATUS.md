@@ -4,15 +4,17 @@ _Last updated: 2026-03-17_
 
 ## Snapshot
 
-SigmaCLI is now a **public-shareable, evidence-first operator CLI** with real value on the read side.
+SigmaCLI is in an architectural transition.
 
 Current honest headline:
 
-- **strong today:** capture, decode, plan, ABI inspection, and read-only account / route evidence
-- **verified live highlight:** explicit `/trade` close is real, distinct from `Adjust Leverage`, and verified onchain
-- **not the current story:** generic governance coverage or broad write automation
+- **shipped today:** evidence-first, read-heavy operator tooling
+- **next build focus:** wallet backend/signing abstraction and direct route execution architecture
+- **not the product architecture:** browser automation or accessibility-driven control
 
 ## Most important verified truths
+
+These remain the core repo truths:
 
 - tx `0x9b7323079dbb07bf0cd6b9fb89d0f5851d3c36235b9f26592c808934b9d0f50d`
   - verified **partial repay / partial close**
@@ -23,15 +25,12 @@ Current honest headline:
   - burned full remaining debt: `3.2205711509703163 bnbUSD`
   - removed full remaining collateral: `0.014954999999999998 BNB`
   - paid out **`6.792825626759770802 USDT`**
+- explicit `/trade` `Close` is distinct from `Adjust Leverage`
 - position / NFT `#158` remained wallet-owned after full economic close, but only as a **zero-state shell**:
   - `rawColls = 0`
   - `rawDebts = 0`
-- mint-close semantics remain important, but the repo should now distinguish clearly between:
-  - partial mint-side repay / partial close evidence
-  - terminal `/trade` close evidence
-  - shell-NFT post-close semantics
 
-## Shipped command surface
+## Current shipped surface
 
 Implemented now:
 
@@ -48,56 +47,72 @@ Implemented now:
 - `config`
 - `governance ...` scaffolds
 
-See [`COMMAND_MATURITY.md`](COMMAND_MATURITY.md) for the maturity labels.
+This is real shipped value, but it is still primarily a read/evidence stack.
+
+## What changed in the public framing
+
+The repo is now explicitly centered on:
+
+- wallet connectivity
+- signer/backend abstraction
+- execution policy
+- direct route adapters
+- `plan -> execute -> verify`
+- post-state verification
+
+The repo is explicitly **not** centered on:
+
+- browser interaction as the core execution model
+- accessibility/UI automation as the product contract
+- governance as the current top-level focus
 
 ## Current route truth
 
-### Verified and useful now
+### Strongest verified areas
 
 - `/trade`
   - explicit `Close` path is verified distinct from `Adjust Leverage`
-  - full terminal close is verified onchain
-- `/earn`
-  - deposit and delayed withdraw semantics were observed live
-  - repo read-side classification here is useful and real
+  - terminal close is verified onchain
 - `/mintv2`
   - BNB -> bnbUSD mint open is verified live
   - partial repay / partial close semantics are real and modeled read-first in the CLI
+- `/earn`
+  - deposit and delayed withdraw semantics were observed live
+  - read-side classification here is useful and real
 
-### Not yet safe to overclaim
+### Important caution
 
-- generalized write execution support
-- add-margin / reduce semantics across all trade management paths
-- full dedicated `/mintv2` close execution story independent of the verified `/trade` close result
-- deep governance execution support
+The repo should still avoid overclaiming:
 
-### Governance note
-
-- `/governance` remains **blank / non-rendered** in observed current state
-- route-specific children such as `/xsigma`, `/vote`, `/incentivize`, `/dashboard`, and `/statistics` are better next-phase read targets than governance-first framing
+- broad wallet execution support
+- full route coverage
+- governance execution support
+- browser-driven automation as a supported core path
 
 ## Near-term milestone direction
 
-See [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md) for the concrete public milestone spec.
+See [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md) and [`WALLET_ARCHITECTURE.md`](WALLET_ARCHITECTURE.md).
 
-Best next milestone after this repo-polish pass:
+The next milestone is:
 
-1. **expand route-specific read models before more execution claims**, especially:
-   - `stats`
-   - `dashboard`
-   - richer account aggregation
-2. **prove remaining `/trade` management semantics** beyond the now-verified explicit close path:
-   - add margin
-   - reduce
-   - leverage-adjust edge cases
-3. **only revisit dedicated `/mintv2` close execution capture on a new repay-ready live position**, not by muddying the already-verified terminal close story
+1. build the wallet foundation first
+2. make policy/config explicit
+3. define the command spine around `auth`, `status`, `doctor`, `plan`, `execute`, and `verify`
+4. add first direct route adapters in the strongest-evidence areas
 
-## Source-of-truth reading order
+## Best reader path from here
 
 - [`README.md`](README.md)
+- [`WALLET_ARCHITECTURE.md`](WALLET_ARCHITECTURE.md)
 - [`SPEC.md`](SPEC.md)
+- [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md)
+- [`SIGMA_CLI_COMMAND_SPEC_NEXT.md`](SIGMA_CLI_COMMAND_SPEC_NEXT.md)
 - [`COMMAND_MATURITY.md`](COMMAND_MATURITY.md)
-- [`SIGMA_RUN_LEDGER.md`](SIGMA_RUN_LEDGER.md)
-- [`SIGMA_STATUS_AND_PUBLIC_REPO_PATH.md`](SIGMA_STATUS_AND_PUBLIC_REPO_PATH.md)
 
-Historical execution-pack docs remain useful, but they are no longer the easiest public entrypoint.
+## Bottom line
+
+SigmaCLI already has a credible public story.
+
+That story is now:
+
+> **a wallet-aware operator CLI that is strong on evidence today and is being rebuilt around direct wallet-backed route execution, not browser automation.**

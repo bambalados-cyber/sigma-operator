@@ -1,218 +1,198 @@
-# Next milestone: read-model expansion + remaining `/trade` semantics
+# Next milestone: wallet foundation + first direct route adapters
 
 _Last updated: 2026-03-17_
 
 ## Objective
 
-Make SigmaCLI materially stronger at the things it is already credible at:
+Build the wallet layer first.
 
-1. **public/read-first protocol visibility**
-2. **owner/account aggregation and portfolio interpretation**
-3. **evidence-backed clarification of the next unresolved `/trade` management semantics**
+The next public milestone is no longer framed as "more browser-observed read coverage."
 
-This milestone is intentionally **not** about generalized write automation.
+It is:
 
-## Why this is the next milestone
+1. define and ship the wallet/signing backend abstraction
+2. make execution policy explicit
+3. establish a real `plan -> execute -> verify` flow
+4. add direct route adapters where SigmaCLI already has the strongest evidence
+5. keep browser/UI work as validation and research only
 
-The repo already has a clear public truth:
+## Why this is the right next milestone
 
-- `/trade` explicit `Close` is verified live and distinct from `Adjust Leverage`
+The repo already knows enough to make the product direction clear:
+
+- SigmaCLI should connect to wallets, not browsers
+- route execution should come from direct adapters, not accessibility or click automation
+- read-first tooling is still crucial, but now as the safety substrate for execution
+- the current strongest truths are route semantics and post-state evidence, not UI automation
+
+So the next milestone should build the missing execution foundation instead of widening the read-only surface first.
+
+## Preserved truths
+
+This milestone keeps these existing truths intact:
+
+- explicit `/trade` **Close** is distinct from `Adjust Leverage`
 - terminal `/trade` close is verified onchain
-- SigmaCLI is strongest today on **read, decode, evidence, and operator interpretation**
-- route-render-observed surfaces like `/statistics` and `/dashboard` are better next targets than broad execution claims
+- verified terminal close paid out **USDT**
+- partial repay / partial close remains distinct from terminal close
+- a closed economic position may persist as a wallet-owned **zero-state shell NFT**
 
-So the next step should deepen the repo where trust is already high:
-
-- expand read support for `stats`
-- add practical `dashboard` read models
-- improve cross-surface account aggregation
-- then prove the next unresolved `/trade` management semantics before claiming more execution coverage
+Those are inputs to the new architecture, not facts to re-litigate.
 
 ## In scope
 
-### 1) `stats` read support
+### 1) Wallet backend abstraction
 
-Add a dedicated read-only `stats` family for the observed `/statistics` surface.
+Define and implement the common backend model for:
 
-Target outcomes:
+- `readonly`
+- `external-session`
+- `local-key-env`
 
-- normalized protocol overview output
-- explicit source visibility
-- pool / TVL style datasets where currently observable
-- raw dataset passthrough for operator inspection when schemas drift
+Minimum requirements:
 
-### 2) `dashboard` read models
+- explicit backend kind
+- chain id and address visibility
+- capability flags for read / sign / send / wait
+- named profile selection
 
-Add owner-centric reads for the observed `/dashboard` surface.
+### 2) Policy and config model
 
-Target outcomes:
+Extend the operator config so it governs:
 
-- summary view
-- rewards view
-- points / account-side score view if surfaced reliably
-- unwrap-related preview/read model only if it can be done honestly without implying execution support
+- default profile
+- approval policy (`exact`, `unlimited`, `custom`)
+- route enablement
+- verification requirement
+- slippage defaults and caps
 
-### 3) deeper account aggregation / portfolio visibility
+### 3) Command spine
 
-Extend `account` so it becomes the operator’s best cross-surface wallet summary.
+Define and begin landing the next command spine:
 
-Target outcomes:
+- `auth`
+- `status`
+- `doctor`
+- `plan`
+- `execute`
+- `verify`
 
-- clearer aggregation across `/trade`, `/earn`, `/mintv2`, and dashboard-side reads
-- rewards and exposure summaries where they can be computed honestly
-- explicit distinction between:
-  - active economic positions
-  - pending/redeemable stability-pool states
-  - wallet-held balances
-  - wallet-owned **zero-state shell NFTs** (`rawColls = 0`, `rawDebts = 0`)
+Minimum expectations for this milestone:
 
-### 4) prove the next unresolved `/trade` semantics
+- `auth` can describe/connect backends
+- `status` can summarize backend and route state
+- `doctor` can run real preflight checks
+- `plan` produces an explicit artifact
+- `execute` is policy-gated
+- `verify` checks post-state, not just receipts
 
-Before expanding write claims, gather route- and tx-level truth for:
+### 4) Route capability registry
 
-- **add margin**
-- **reduce**
-- **leverage-adjust edge behavior**
+Create the adapter/capability layer that marks each route with:
 
-This is a proof milestone first, not a “ship every management action” milestone.
+- read support
+- plan support
+- execute support
+- verify support
+- required backend types
+- approval behavior
+- post-state checks
+- maturity label
+
+### 5) First direct route adapters
+
+Prioritize route adapters in the strongest-evidence order:
+
+1. `trade.close`
+2. `mint.repay`
+3. `earn.deposit`
+4. `earn.claim`
+
+Important rule:
+
+- route adapters must stay route-specific
+- no generic "execute Sigma action" abstraction as the first implementation
 
 ## Out of scope
 
 Not part of this milestone:
 
-- generalized write automation
-- broad wallet-execution support across Sigma routes
-- governance-first repo framing
-- treating `/governance` as the center of repo truth
-- relitigating the already-resolved `#158` close story except as established truth
-- claiming support for new assets or new mint lanes without fresh evidence
-- promising production-safe execution flows
-
-## Proposed command additions and changes
-
-### New command family: `stats`
-
-Proposed first commands:
-
-- `sigma stats overview`
-- `sigma stats tvl`
-- `sigma stats pools`
-- `sigma stats sources`
-- `sigma stats raw --dataset <name>`
-
-Rules:
-
-- keep `stats` read-only
-- preserve raw/source visibility so operators can inspect drift rather than trust silent normalization
-
-### New command family: `dashboard`
-
-Proposed first commands:
-
-- `sigma dashboard summary --owner <address>`
-- `sigma dashboard rewards --owner <address>`
-- `sigma dashboard points --owner <address>`
-- `sigma dashboard unwrap-preview --owner <address>` only if it remains an honest read/preview surface
-
-Rules:
-
-- no claim/unwrap execution in this milestone
-- if a dashboard field cannot be sourced stably, surface that uncertainty directly
-
-### `account` expansion
-
-Keep `account status` as the anchor, then extend with:
-
-- `sigma account rewards --owner <address>`
-- `sigma account exposure --owner <address>`
-
-Also strengthen existing output so `account status` / `account positions` can better represent:
-
-- live vs zero-state positions
-- dashboard-linked rewards context
-- `/earn` deposited vs pending vs claimable states
-- clearer owner-level portfolio totals where they are evidence-backed
-
-### `/trade` semantics handling in this milestone
-
-No generalized write command expansion is required to call this milestone successful.
-
-Instead:
-
-- keep current `/trade` verified `Close` truth intact
-- collect new evidence for add-margin / reduce / leverage-adjust behavior
-- only promote command/help/docs language after those paths are actually verified
-
-If useful, route-semantics work may first land as:
-
-- richer `decode` interpretation
-- stronger `plan` warnings/disambiguation
-- updated route-truth and maturity docs
+- browser automation as runtime architecture
+- accessibility-driven wallet interaction
+- governance-first expansion
+- pretending all Sigma routes are execution-ready
+- broad route coverage just because UI pages render
+- overpromising unsupported writes
 
 ## Success criteria
 
 This milestone is successful when all of the following are true:
 
-### Read-side delivery
+### Architecture
 
-- `stats` exists as a real, useful read-only command family
-- `dashboard` has at least a credible summary/rewards read surface
-- `account` gives a stronger owner-level portfolio view than today
+- the public docs clearly center on wallet backends and direct route interaction
+- browser/UI work is explicitly described as non-core validation only
+- the command spine is documented and internally consistent
 
-### Truth quality
+### Foundation
 
-- docs continue to describe SigmaCLI as **read-first** and **evidence-first**
-- new command/help text does not imply generalized execution support
-- zero-state shell handling remains explicit and operator-safe
+- backend profiles exist
+- policy/config is explicit
+- route capability records exist
+- `plan` and `verify` share a stable artifact model
 
-### `/trade` semantic proof
+### Execution readiness
 
-- repo evidence clearly classifies add margin, reduce, and leverage-adjust edge behavior
-- docs distinguish verified behavior from still-unresolved behavior
-- no new trade-management claim is upgraded to “supported” without evidence
+- `doctor` can reject bad backend/policy/route states before execution
+- `execute` is wired through route adapters rather than hand-wavy generic calls
+- post-state verification is defined as part of success, not an optional afterthought
 
-## Verification plan
+### Honesty
 
-### For `stats`
+- the repo still does not claim broad execution support if only the foundation exists
+- route maturity stays explicit
+- current verified truths remain visible in README/spec/status docs
 
-- capture live `/statistics` payloads and route-render state
-- record source provenance for each surfaced dataset
-- compare normalized CLI output against raw payloads
-- keep a raw escape hatch when schemas or source fields drift
+## Suggested implementation order
 
-### For `dashboard`
+### Phase 1
 
-- capture live `/dashboard` render state and backing payloads
-- verify owner-level summaries against visible UI/account state
-- only expose points/rewards fields that can be matched consistently
+- `WALLET_ARCHITECTURE.md`
+- command spec rewrite
+- config/policy extension
+- backend interface and profiles
 
-### For `account`
+### Phase 2
 
-- cross-check aggregated output against existing `account status`, `account positions`, `account history`, and `account stability-pools`
-- verify shell-position classification on known closed state patterns
-- ensure aggregation does not double-count wallet, deposited, pending, and claimable balances
+- `auth`
+- `status`
+- `doctor`
+- route capability registry
 
-### For `/trade` semantics
+### Phase 3
 
-- capture the surfaced route states for add margin / reduce / leverage adjust
-- decode any associated txs/receipts before making support claims
-- document edge cases separately from the already-verified explicit `Close` path
-- keep route-truth, command-truth, and public wording aligned
+- stable plan artifact
+- stable verify artifact
+- shared execution result persistence
 
-## Risks
+### Phase 4
 
-- current-app helper / API schemas may drift
-- dashboard/statistics data may be useful but not stable enough for over-normalized contracts
-- owner aggregation can become misleading if balances are double-counted across wallet and protocol states
-- `/trade` management surfaces may render more clearly than they decode; proof still has to come from evidence, not UI labels alone
+- first direct route adapter: `trade.close`
+- then `mint.repay`
+- then selected `/earn` flows
 
-## Non-goals and guardrails
+## Verification plan for this milestone
 
-- Do not turn this into a generic trading bot milestone.
-- Do not present governance as “done” because some child routes render.
-- Do not muddy the verified close story with speculative new close narratives.
-- Do not hide uncertainty: when a source is partial or inferred, say so.
+- validate backend selection and profile resolution without sending txs
+- validate doctor output against real route/account state
+- validate plan artifacts against known verified Sigma semantics
+- validate verify output against known historic tx truths
+- only then start bounded live execution for the first route adapter(s)
 
 ## Bottom line
 
-The next public milestone should make SigmaCLI better at **seeing**, **explaining**, and **classifying** Sigma state before it tries to automate more of Sigma. That means: `stats`, `dashboard`, richer `account` aggregation, and evidence-backed proof of the remaining `/trade` management semantics — while keeping execution claims intentionally narrow.
+The next SigmaCLI milestone is:
+
+> **wallet layer first, direct route adapters second, execution only through policy-gated plan/verify flow.**
+
+That is the cleanest path from a strong read/evidence CLI to a trustworthy execution-capable SigmaCLI.
