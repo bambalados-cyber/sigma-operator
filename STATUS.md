@@ -78,6 +78,8 @@ See [`COMMAND_MATURITY.md`](COMMAND_MATURITY.md) for the maturity labels.
 
 ## Near-term milestone direction
 
+See [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md) for the concrete public milestone spec.
+
 Best next milestone after this repo-polish pass:
 
 1. **expand route-specific read models before more execution claims**, especially:

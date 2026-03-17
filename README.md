@@ -32,6 +32,7 @@ See also:
 
 - [`STATUS.md`](STATUS.md) — compact current snapshot
 - [`SPEC.md`](SPEC.md) — public repo spec and operating model
+- [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md) — next public milestone and scope guardrails
 - [`COMMAND_MATURITY.md`](COMMAND_MATURITY.md) — command/surface maturity labels
 - [`SIGMA_RUN_LEDGER.md`](SIGMA_RUN_LEDGER.md) — chronological verification ledger
 - [`SIGMA_STATUS_AND_PUBLIC_REPO_PATH.md`](SIGMA_STATUS_AND_PUBLIC_REPO_PATH.md) — maintainer trajectory memo
@@ -182,8 +183,9 @@ If you are new here, read in this order:
 1. `README.md`
 2. [`STATUS.md`](STATUS.md)
 3. [`SPEC.md`](SPEC.md)
-4. [`COMMAND_MATURITY.md`](COMMAND_MATURITY.md)
-5. [`SIGMA_RUN_LEDGER.md`](SIGMA_RUN_LEDGER.md)
-6. [`MINT_CLOSE_CONTRACT_MAP_2026-03-16.md`](MINT_CLOSE_CONTRACT_MAP_2026-03-16.md) if you are touching mint-close logic
+4. [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md)
+5. [`COMMAND_MATURITY.md`](COMMAND_MATURITY.md)
+6. [`SIGMA_RUN_LEDGER.md`](SIGMA_RUN_LEDGER.md)
+7. [`MINT_CLOSE_CONTRACT_MAP_2026-03-16.md`](MINT_CLOSE_CONTRACT_MAP_2026-03-16.md) if you are touching mint-close logic
 
 Then read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a PR.

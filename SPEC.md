@@ -215,6 +215,8 @@ SigmaCLI is **not** yet trying to be credible when it says:
 
 ## 8) Near-term milestones
 
+The concrete public scope for the next step lives in [`MILESTONE_NEXT.md`](MILESTONE_NEXT.md).
+
 The next milestone should deepen the repo where it is already strong.
 
 ### Milestone A — route-specific read expansion
